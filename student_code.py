@@ -131,6 +131,7 @@ class KnowledgeBase(object):
         # Not required for the extra credit assignment
 
     def kb_explain(self, fact_or_rule):
+
         """
         Explain where the fact or rule comes from
 
@@ -140,8 +141,56 @@ class KnowledgeBase(object):
         Returns:
             string explaining hierarchical support from other Facts and rules
         """
+
         ####################################################
         # Student code goes here
+        answer = self.answer_function(fact_or_rule,"")
+        return answer
+
+    def answer_function(self, fact_or_rule, original_indent):
+        answer = ""
+        answer += original_indent
+
+        if isinstance(fact_or_rule, Fact):
+            if fact_or_rule in self.facts:
+                fact_or_rule = self._get_fact(fact_or_rule)
+                answer += "fact: " + str(fact_or_rule.statement)
+                if fact_or_rule.asserted:
+                    answer += " ASSERTED"
+                answer += "\n"
+
+                for child in fact_or_rule.supported_by:
+                    answer += original_indent + "  SUPPORTED BY"
+                    answer += "\n"
+                    for i in child:
+                        answer += self.answer_function(i, original_indent + "    ")
+            else:
+                answer = "Fact is not in the KB"
+            return answer
+
+        elif isinstance(fact_or_rule, Rule):
+            if fact_or_rule in self.rules:
+                fact_or_rule = self._get_rule(fact_or_rule)
+                answer += "rule: ("
+                for left_item in fact_or_rule.lhs:
+                    answer += str(left_item) + ", "
+                answer = answer[:-2]
+                answer += ") -> "
+                answer += str(fact_or_rule.rhs)
+                if fact_or_rule.asserted:
+                    answer += " ASSERTED"
+                answer += "\n"
+
+                for child in fact_or_rule.supported_by:
+                    answer += original_indent + "  SUPPORTED BY\n"
+                    for i in child:
+                        answer += self.answer_function(i, original_indent + "    ")
+            else:
+                answer = "Rule is not in the KB"
+            return answer
+
+        else:
+            return False
 
 
 class InferenceEngine(object):
